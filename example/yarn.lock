@@ -9026,6 +9026,10 @@ react-dev-utils@^11.0.3:
     strip-ansi "6.0.0"
     text-table "0.2.0"
 
+"react-di@git+ssh://git@github.com:nine7soft/react-di.git":
+  version "1.0.0"
+  resolved "git+ssh://git@github.com:nine7soft/react-di.git#a902de53e5a3b90185f66db2315522232231e946"
+
 react-dom@^17.0.2:
   version "17.0.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-17.0.2.tgz#ecffb6845e3ad8dbfcdc498f0d0a939736502c23"
@@ -9049,6 +9053,10 @@ react-is@^17.0.1:
   version "17.0.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
   integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
+
+"react-modx@git+ssh://git@github.com:nine7soft/react-modx.git":
+  version "1.0.0"
+  resolved "git+ssh://git@github.com:nine7soft/react-modx.git#94322b2181b73132a677c9edf8c91bb0004fc98b"
 
 react-refresh@^0.8.3:
   version "0.8.3"

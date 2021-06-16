@@ -5,3 +5,4 @@ export declare const modx: () => {
     config(store: Store, sagaMiddleware: SagaMiddleware<{}>): void;
     useModularState(moduleName: string, initialState: any, callableMap: StateCallableMapObjectInterface): any[];
 };
+export default modx;

@@ -16,7 +16,9 @@
     "redux": "^4.1.0",
     "redux-saga": "^1.1.3",
     "typescript": "^4.1.2",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "react-di": "git+ssh://git@github.com:nine7soft/react-di.git",
+    "react-modx": "git+ssh://git@github.com:nine7soft/react-modx.git"
   },
   "scripts": {
     "start": "react-scripts start",

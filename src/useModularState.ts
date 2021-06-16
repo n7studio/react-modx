@@ -20,3 +20,5 @@ export const modx = () => {
     },
   };
 };
+
+export default modx;
