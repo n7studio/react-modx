@@ -1,11 +1,11 @@
-import modx from 'react-modx'
-import { useDependency } from 'react-di';
+import { modx, StateCallableMapObjectInterface } from "react-modx";
+import { useDependency } from "react-di";
 
-export const useModularState = () => {
-    const store = useDependency("storeBontrack");
-    const saga = useDependency("sagaBontrack");
-    const modx = modx.config(store, saga);
-
-    return modx.useModularState()
-}
-
+export const useModularState = (moduleName: string, initialState: any, callableMap: StateCallableMapObjectInterface) => {
+  const store = useDependency("store");
+  const saga = useDependency("sagaMiddleware");
+  const storeModx = modx()
+  storeModx.config(store, saga);
+  
+  return storeModx.useModularState(moduleName, initialState, callableMap);
+};

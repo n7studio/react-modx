@@ -1,5 +1,10 @@
+export interface FakeApiClientInterface {
+  getHelloWorld: Function;
+}
+
 export class FakeApiClient {
   public async getHelloWorld() {
+    console.log('call fake api client')
     //this an example we have to test it
     const response = {
       status: 200,
@@ -10,7 +15,7 @@ export class FakeApiClient {
         },
       ],
     };
-      
-    return response;
+
+    return response.data;
   }
 }

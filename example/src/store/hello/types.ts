@@ -1,0 +1,4 @@
+export enum Types {
+    GET_HELLO_WORLD = "GET_HELLO_WORLD",
+    ADD_HELLO_WORLD  = "ADD_HELLO_WORLD",
+}

@@ -1,0 +1,1 @@
+export { getHelloWorld } from './getHelloWorld'

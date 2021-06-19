@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { default as diConfig } from "./config/di";
+import { diConfig } from "./config/di";
 import { ContainerProvider } from "react-di";
 
 ReactDOM.render(
