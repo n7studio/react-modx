@@ -23,7 +23,7 @@ export const diConfig = {
   },
   fakeApiClient: () => {
     const fakeApiClient = new FakeApiClient();
-    console.log('fake api client')
+
     return fakeApiClient;
   },
 };
