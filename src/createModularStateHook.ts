@@ -84,7 +84,16 @@ function useModularState(moduleName: string, initialState: any, callableMap: Sta
 
   const [moduleState, setModuleState] = useState(() => getState(moduleName, store));
   useLayoutEffect(() => {
-    subscribe(moduleName, (value: any) => setModuleState(() => value), store);
+    let isMounted = true;
+    subscribe(moduleName, (value: any) => {
+      if (isMounted) {
+        setModuleState(() => value);
+      }
+    }, store);
+
+    return () => {
+      isMounted = false;
+    }
   }, [setModuleState]);
 
   registerReducersDispatchers(callableMap, store);
