@@ -1,6 +1,6 @@
 {
-  "name": "react-modx",
-  "version": "1.0.0",
+  "name": "@nine7soft/react-modx",
+  "version": "1.0.1",
   "repository": "git@github.com:nine7soft/react-modx.git",
   "author": "nine7soft",
   "license": "MIT",
