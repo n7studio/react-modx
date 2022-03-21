@@ -1,11 +1,14 @@
 import { useState, useLayoutEffect } from "react";
 import { combineReducers, Reducer, ReducersMapObject, Store } from "redux";
 import { SagaMiddleware } from "redux-saga";
-import { takeLatest, takeEvery } from "redux-saga/effects";
-import { StateCallableMapObjectInterface, ReducerCallable, SagaCallable } from ".";
+// import { takeLatest, takeEvery } from "redux-saga/effects";
+// import { CallablesConfig } from "./types/CallablesConfig";
+import { ReducerConfig } from "./types/ReducerConfig";
+// import { SagaConfig } from "./types/SagaConfig";
 
 let reducers: ReducersMapObject = {};
-let sagas: Array<string> = [];
+// let sagas: Array<string> = [];
+
 const dispatchers: any = {};
 
 function injectReducer(moduleName: string, reducer: Reducer, store: Store) {
@@ -15,18 +18,22 @@ function injectReducer(moduleName: string, reducer: Reducer, store: Store) {
   }
 }
 
-function injectSaga(name: string, sagaConfig: any, sagaMiddleware: SagaMiddleware) {
-  const { call:saga, effectCreator:effectCreatorName } = sagaConfig;
-  
-  const effectCreator = resolveEffectCreator(effectCreatorName);
+// function injectSaga(
+//   name: string,
+//   sagaConfig: SagaConfig,
+//   sagaMiddleware: SagaMiddleware
+// ) {
+//   const { saga, effectCreator: effectCreatorName } = sagaConfig;
 
-  if (!sagas.includes(name)) {
-    sagas.push(name);
-    sagaMiddleware.run(function* () {
-      yield effectCreator(name, saga);
-    });
-  }
-}
+//   const effectCreator = resolveEffectCreator(effectCreatorName);
+
+//   if (!sagas.includes(name)) {
+//     sagas.push(name);
+//     sagaMiddleware.run(function* () {
+//       yield effectCreator(name, saga);
+//     });
+//   }
+// }
 
 function getState(moduleName: string, store: Store) {
   const state: any = store.getState();
@@ -35,102 +42,178 @@ function getState(moduleName: string, store: Store) {
 
 function subscribe(moduleName: string, f: Function, store: Store) {
   let moduleState = getState(moduleName, store);
-  return store.subscribe(() => moduleState !== getState(moduleName, store) && f((moduleState = getState(moduleName, store))));
+  return store.subscribe(
+    () =>
+      moduleState !== getState(moduleName, store) &&
+      f((moduleState = getState(moduleName, store)))
+  );
 }
 
-function switchCallableType(callableName: string, stateCallableMapName: "reducers" | "sagas", callableMap: StateCallableMapObjectInterface) {
-  const stateCallable: ReducerCallable | SagaCallable = callableMap[stateCallableMapName][callableName];
-  const type: string = stateCallable.type;
-  callableMap[stateCallableMapName][type] = stateCallable;
-  delete callableMap[stateCallableMapName][callableName];
+function switchType(
+  configIndex: string,
+  configs: {
+    [configIndex: string]: ReducerConfig;
+  }
+) {
+  const config = configs[configIndex];
+  const { actionType } = config;
+  configs[actionType] = config;
+  delete configs[configIndex];
 
-  return type;
+  return actionType;
 }
 
-function registerReducersDispatchers(callableMap: StateCallableMapObjectInterface, store: Store) {
-  Object.keys(callableMap.reducers).forEach((callableName: string) => {
-    const type = switchCallableType(callableName, "reducers", callableMap);
-    dispatchers[callableName] = (payload: any) => store.dispatch({ type, payload });
+function registerReducersDispatchers(
+  reducersConfig: {
+    [configIndex: string]: ReducerConfig;
+  },
+  store: Store
+) {
+  Object.keys(reducersConfig).forEach((configIndex: string) => {
+    const reducerConfig = reducersConfig[configIndex];
+    const callableName = reducerConfig.reducerName || configIndex;
+    const type = reducerConfig.actionType;
+
+    switchType(configIndex, reducersConfig);
+
+    dispatchers[callableName] = (payload: any) =>
+      store.dispatch({ type, payload });
   });
 }
 
-function registerSagasDispatchers(callableMap: StateCallableMapObjectInterface, sagaMiddleware: SagaMiddleware, store: Store) {
-  Object.keys(callableMap.sagas).forEach((callableName: string) => {
-    const type = switchCallableType(callableName, "sagas", callableMap);
-    const sagaConfig = callableMap.sagas[type];
-    injectSaga(type, sagaConfig, sagaMiddleware);
-    dispatchers[callableName] = (payload: any) => store.dispatch({ type, payload });
-  });
-}
+// function registerSagasDispatchers(
+//   callablesConfig: CallablesConfig,
+//   sagaMiddleware: SagaMiddleware,
+//   store: Store
+// ) {
+//   Object.keys(callablesConfig?.sagasConfig).forEach((configKey: string) => {
+//     let sagaConfig = callablesConfig.sagasConfig[configKey];
+//     const callableName = sagaConfig.sagaName || configKey;
+//     const type = switchType(
+//       callableName,
+//       "sagasConfig",
+//       callablesConfig
+//     );
 
-function resolveEffectCreator(effectCreatorName:string|undefined = undefined){
+//     sagaConfig = callablesConfig.sagasConfig[type];
 
-  if(!effectCreatorName){
-    return takeLatest;
-  }
+//     injectSaga(type, sagaConfig, sagaMiddleware);
 
-  switch (effectCreatorName) {
-    case "takeLatest":
-      return takeLatest;
+//     dispatchers[callableName] = (payload: any) =>
+//       store.dispatch({ type, payload });
+//   });
+// }
 
-    case "takeEvery":
-      return takeEvery;
-  
-    default:
-      throw Error(`Unknown effect "${effectCreatorName}". Defualt effect is "takeLatest"`)
-  }
-}
+// function resolveEffectCreator(
+//   effectCreatorName: string | undefined = undefined
+// ) {
+//   if (!effectCreatorName) {
+//     return takeLatest;
+//   }
+
+//   switch (effectCreatorName) {
+//     case "takeLatest":
+//       return takeLatest;
+
+//     case "takeEvery":
+//       return takeEvery;
+
+//     default:
+//       throw Error(
+//         `Unknown effect "${effectCreatorName}". Defualt effect is "takeLatest"`
+//       );
+//   }
+// }
 
 function throwErrorIfStoreIsInvalid(store: Store) {
   if (!(store instanceof Object) || !("replaceReducer" in store)) {
-    throw Error("Invalid store provided when calling createModularStateHook function.");
+    throw Error(
+      "Invalid store provided when calling createModularStateHook function."
+    );
   }
 }
 
 function throwErrorIfSagaMiddlewareIsInvalid(sagaMiddleware: SagaMiddleware) {
   if (!(sagaMiddleware instanceof Object) || !("run" in sagaMiddleware)) {
-    throw Error("Invalid saga middleware provided when calling createModularStateHook function.");
+    throw Error(
+      "Invalid saga middleware provided when calling createModularStateHook function."
+    );
   }
 }
 
-function useModularState(moduleName: string, initialState: any, callableMap: StateCallableMapObjectInterface, store: Store, sagaMiddleware: SagaMiddleware) {
+function useModularState<S = undefined, D = undefined>(
+  moduleName: string,
+  initialState: S,
+  reducersConfig: {
+    [reducerKey: string]: ReducerConfig;
+  },
+  store: Store
+  // sagaMiddleware: SagaMiddleware
+) {
   //init reducers
   injectReducer(
     moduleName,
     (state = initialState, { type, payload }) => {
-      const reducerObject = callableMap.reducers[type];
-      return reducerObject ? reducerObject.call(state, payload) : state;
+      const reducerConfig = reducersConfig[type];
+      return reducerConfig ? reducerConfig.reducer(state, payload) : state;
     },
     store
   );
 
-  const [moduleState, setModuleState] = useState(() => getState(moduleName, store));
+  const [moduleState, setModuleState] = useState(() =>
+    getState(moduleName, store)
+  );
   useLayoutEffect(() => {
     let isMounted = true;
-    subscribe(moduleName, (value: any) => {
-      if (isMounted) {
-        setModuleState(() => value);
-      }
-    }, store);
+    subscribe(
+      moduleName,
+      (value: any) => {
+        if (isMounted) {
+          setModuleState(() => value);
+        }
+      },
+      store
+    );
 
     return () => {
       isMounted = false;
-    }
+    };
   }, [setModuleState]);
 
-  registerReducersDispatchers(callableMap, store);
-  registerSagasDispatchers(callableMap, sagaMiddleware, store);
+  registerReducersDispatchers(reducersConfig, store);
+  // registerSagasDispatchers(callablesConfig, sagaMiddleware, store);
 
-  return [moduleState, dispatchers, { getState, subscribe }];
+  const result: [S, D, any] = [
+    moduleState,
+    dispatchers as D,
+    { getState, subscribe },
+  ];
+
+  return result;
 }
 
-function createUseModularStateHook(store: Store, sagaMiddleware: SagaMiddleware) {
+function createModularStateHook<S = undefined, D = undefined>(
+  store: Store,
+  sagaMiddleware: SagaMiddleware
+) {
   throwErrorIfStoreIsInvalid(store);
   throwErrorIfSagaMiddlewareIsInvalid(sagaMiddleware);
 
-  return (moduleName: string, initialState: any, callableMap: StateCallableMapObjectInterface) => {
-    return useModularState(moduleName, initialState, callableMap, store, sagaMiddleware);
+  return (
+    moduleName: string,
+    initialState: S,
+    reducersConfig: {
+      [reducerKey: string]: ReducerConfig;
+    }
+  ) => {
+    return useModularState<S, D>(
+      moduleName,
+      initialState,
+      reducersConfig,
+      store
+      // sagaMiddleware
+    );
   };
 }
 
-export default createUseModularStateHook;
+export default createModularStateHook;

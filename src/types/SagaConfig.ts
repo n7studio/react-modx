@@ -1,7 +1,8 @@
 import { Saga } from "redux-saga";
 
-export interface SagaCallable {
-  type: string;
+export interface SagaConfig {
+  actionType: string;
+  sagaName?: string;
   effectCreator: "takeLatest" | "takeEvery" | undefined;
-  call: Saga<any[]>;
+  saga: Saga<any[]>;
 }
